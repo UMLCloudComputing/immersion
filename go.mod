@@ -1,4 +1,4 @@
-module immersion
+module umlcloudcomputing.org/immersion_cdk
 
 go 1.18
 
