@@ -1,8 +1,9 @@
 package main
 
 import (
-	"immersion/config"
 	"os"
+
+	"umlcloudcomputing.org/immersion_cdk/config"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
