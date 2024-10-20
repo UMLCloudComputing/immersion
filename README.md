@@ -1,8 +1,10 @@
 <div align="center">
-    <img src="img/logo.png" alt="Logo" width="50%" height="50%"/>
+    <img src="img/cover-transparent.svg" alt="Logo" width="50%" height="50%"/>
+    <h3>A Discord application that aims to bridge the gap between using Discord and Campus Lab's Engage platform to better help university clubs manage their organizations.</h3>
     <hr>
-    <h1>Immersion</h1>
 </div>
+
+README is under construction!
 
 This is a blank project for CDK development with Go.
 
