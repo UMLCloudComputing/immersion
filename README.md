@@ -1,4 +1,8 @@
-# Welcome to your CDK Go project!
+<div align="center">
+    <img src="img/logo.png" alt="Logo" width="50%" height="50%"/>
+    <hr>
+    <h1>Immersion</h1>
+</div>
 
 This is a blank project for CDK development with Go.
 
