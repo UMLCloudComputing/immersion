@@ -1,0 +1,20 @@
+{
+    "totalItems": 0,
+    "items": [
+      {
+        "id": 6,
+        "userId": {
+          "communityMemberId": 0,
+          "accountId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "username": "string",
+          "campusEmail": "user@example.com",
+          "swipeCardIdentifier": "string"
+        },
+        "organizationId": 42,
+        "startedOn": "2020-09-10",
+        "endedOn": "2020-09-10",
+        "modifiedOn": "2020-09-08T14:27:16.823+00:00",
+        "privacySetting": "Show"
+      }
+    ]
+}
