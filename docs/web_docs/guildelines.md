@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: Contribution Guidelines for Immersion. Details on setting up the environment, submitting changes, and reporting bugs.
 ---
 
 # Contribution Guidelines
