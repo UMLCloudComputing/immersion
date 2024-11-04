@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: General information for onboarding onto Immersion. Things to know, technologies used, etc.
 ---
 
 # What To Know
@@ -16,11 +17,20 @@ __Resources:__
 - [Discord Go GitHub Repository](https://github.com/bwmarrin/discordgo)
 
 ## React JS 
-
+t
 One of the parts of the project that we need to build is a dashboard for users to change bot settings for their server. This will most likely use React JS so knowing how it works will help in developing this part. 
 
 __Resources:__
 - [Learn React](https://react.dev/learn)
+
+## Python Programming Language
+
+It's important to be familiar with the Python Programming language. We'll be using Python when defining and auditing our CDK stack.
+It's important to understand the fundamentals to successfully manage our cloud resources for Immersion:
+- Python Classes
+- Python Function
+- etc
+Here's a useful [resource](https://learnxinyminutes.com/docs/python/)
 
 ## AWS Services
 
@@ -28,7 +38,8 @@ Below are the following AWS services that we know we will be using at the moment
 
 - Lambda
 - DynamoDB
-- Cloud Development Kit 
+- Cloud Development Kit (CDK)
+    - [Python Boto3 Library](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
 
 ## The Engage API 
 
