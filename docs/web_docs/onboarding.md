@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+description: General information for onboarding onto Immersion. Things to know, technologies used, etc.
 ---
 
 # What To Know
