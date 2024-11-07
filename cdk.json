@@ -1,5 +1,5 @@
 {
-  "app": "go mod download && go run immersion.go",
+  "app": "python3 app.py",
   "watch": {
     "include": [
       "**"
@@ -7,9 +7,11 @@
     "exclude": [
       "README.md",
       "cdk*.json",
-      "go.mod",
-      "go.sum",
-      "**/*test.go"
+      "requirements*.txt",
+      "source.bat",
+      "**/__init__.py",
+      "**/__pycache__",
+      "tests"
     ]
   },
   "context": {
@@ -63,6 +65,14 @@
     "@aws-cdk/aws-ec2:ebsDefaultGp3Volume": true,
     "@aws-cdk/aws-ecs:removeDefaultDeploymentAlarm": true,
     "@aws-cdk/custom-resources:logApiResponseDataPropertyTrueDefault": false,
-    "@aws-cdk/aws-s3:keepNotificationInImportedBucket": false
+    "@aws-cdk/aws-s3:keepNotificationInImportedBucket": false,
+    "@aws-cdk/aws-ecs:reduceEc2FargateCloudWatchPermissions": true,
+    "@aws-cdk/aws-dynamodb:resourcePolicyPerReplica": true,
+    "@aws-cdk/aws-ec2:ec2SumTImeoutEnabled": true,
+    "@aws-cdk/aws-appsync:appSyncGraphQLAPIScopeLambdaPermission": true,
+    "@aws-cdk/aws-rds:setCorrectValueForDatabaseInstanceReadReplicaInstanceResourceId": true,
+    "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": true,
+    "@aws-cdk/aws-lambda-nodejs:sdkV3ExcludeSmithyPackages": true,
+    "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": true
   }
 }
