@@ -17,7 +17,7 @@ __Resources:__
 - [Discord Go GitHub Repository](https://github.com/bwmarrin/discordgo)
 
 ## React JS 
-t
+
 One of the parts of the project that we need to build is a dashboard for users to change bot settings for their server. This will most likely use React JS so knowing how it works will help in developing this part. 
 
 __Resources:__
@@ -49,4 +49,3 @@ __Resources:__
 - [IBM Resource on REST APIs](https://www.ibm.com/topics/rest-apis)
 - [Engage API Documentation](https://engage-api.campuslabs.com/swagger/index.html#/)
 - [What is Swagger](https://swagger.io/docs/specification/v2_0/what-is-swagger/)
-
