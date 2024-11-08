@@ -1,26 +1,47 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
+from dotenv import set_key
+
+# TODO
+# Obtain organization ID from search query
+# Obtain primary contact for auth
+
+load_dotenv()
 
 NAME = "X-Engage-Api-Key"
-KEY = "esk_test_7772a5488f56d5def2dc911f5e54e5b2"
+KEY = os.getenv('API_KEY')
 
 headers = {
-    "Name": NAME,
-    "Value": KEY
+    NAME: KEY,
+    'accept': 'application/json'
 }
+
 ROOT_URL = "https://engage-api.campuslabs.com/api/v3.0/"
 
+org_name = input("Please provide your organization name: ")
+
 # Only URLS for GET requests
-URLS = {
-    "events/category": ROOT_URL + "events/category",
-    "events/events/": ROOT_URL + ""
-}
+REQUEST_URL = ROOT_URL + "/organizations/organization?isShownInPublicDirectory=true&name=" + org_name
 
-response = requests.get(URLS['events/'], headers=headers)
+response_data = requests.get(url=REQUEST_URL, headers=headers).json()
 
-response_data = response.json()
+# Obtain the names of organizations from the search query
+# DONE
+print("Please choose from one of the organizations:")
+i = 1
+for item in response_data['items']:
+    print(str(i) + ") " + item['name'])
+    i += 1
 
-print(response_data['items'][1]['userId']['username'])
-print(response_data['items'][0]['userId']['swipeCardIdentifier'])
+org_choice = int(input("Your Choice: ")) - 1
 
-# org_name = input("Please provide your organization's name:")
+org_id = str(response_data['items'][org_choice]['id'])
+print("Your organization ID: " + org_id)
+set_key(".env", "ORG_ID", org_id)
+
+# Obtain primary contact
+contact_dump = response_data['items'][org_choice]['primaryContactId']
+print("Primary contact raw dump:" + json.dumps(contact_dump, indent=4))
+print("Primary contact email: " + contact_dump['campusEmail'])
