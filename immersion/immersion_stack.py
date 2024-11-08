@@ -1,7 +1,7 @@
+import os
 from aws_cdk import (
-    # Duration,
     Stack,
-    # aws_sqs as sqs,
+    aws_apprunner_alpha as apprunner
 )
 from constructs import Construct
 
@@ -10,10 +10,8 @@ class ImmersionStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
-
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "ImmersionQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
+        bot_apprunner = apprunner.Service(self, os.getenv("APP_NAME") + "Service",
+                                          apprunner.Source.from_ecr_public(
+                                           image_configuration=apprunner.ImageConfiguration(port=8080),
+                                           image_identifier="ghcr.io/umlcloudcomputing/immersiondiscordapp:latest"
+                                         ))

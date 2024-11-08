@@ -5,6 +5,9 @@ import aws_cdk as cdk
 
 from immersion.immersion_stack import ImmersionStack
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = cdk.App()
 ImmersionStack(app, "ImmersionStack",
