@@ -1,6 +1,12 @@
+# EDIT ME, file description
+# Author: Gurpreet Singh
+# © UML Cloud Computing Club 2024
+
+
 from datetime import datetime
 class Event:
     """
+    Intialization for creating an Event object
     @params:
     (str)       eventID: Engage Event ID
     (str)       title: event publication title
@@ -10,6 +16,7 @@ class Event:
     (datetime)  endsOn: datetime object of the end time
     (str)       accessCode: Event activation code for Campus Labs Check-in
     (str)       location: Event location
+
     @returns:
     (Event)     Event object
     """
