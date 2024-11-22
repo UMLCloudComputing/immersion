@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
 )
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
@@ -23,8 +23,7 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 }
 
 func main() {
-
-	godotenv.Load("../../.env")
+	//godotenv.Load("../../.env")
 
 	discord, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
@@ -40,10 +39,18 @@ func main() {
 		fmt.Println("Error opening connection, ", err)
 		os.Exit(1)
 	}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "HTTP server here")
+	})
 
 	fmt.Println("Bot is now running, hit CTRL+C to exit!")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	//
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		fmt.Println("HTTP server error:", err)
+	}
+
 	<-sc
 
 	discord.Close()
