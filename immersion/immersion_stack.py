@@ -5,8 +5,9 @@ from aws_cdk import (
     aws_dynamodb as dynamodb,
     aws_ec2 as ec2,
     aws_ecs as ecs,
-    aws_ecs_patterns as ecsp
+    aws_ecs_patterns as ecsp,
 )
+from aws_cdk.aws_ecr_assets import DockerImageAsset
 from constructs import Construct
 from dotenv import load_dotenv
 import os
@@ -37,12 +38,25 @@ class ImmersionStack(Stack):
             cpu=512, # 0.5 vCPU
         )
 
-        # TODO: app_task_defintion.add_container()
+        app_task_defintion.add_container(
+            f'{os.getenv('APP_NAME')}DiscordApp', 
+            image=ecs.ContainerImage.from_docker_image_asset(
+                DockerImageAsset(
+                    self,
+                    f'{os.getenv('APP_NAME')}DiscordAppDockerImage',
+                    directory='src/discordapp/'
+                )
+            ),
+            environment={
+                'DISCORD_TOKEN': os.getenv('DISCORD_TOKEN')
+            }
+        )
 
         app_service = ecs.FargateService(
             self,
             f'{os.getenv('APP_NAME')}DiscordAppService',
             cluster=cluster,
+            task_definition=app_task_defintion
         )
 
         # DynamoDB Table Definitions
