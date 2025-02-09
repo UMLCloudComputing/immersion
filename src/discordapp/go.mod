@@ -1,4 +1,4 @@
-module github.com/umlcloudcomputing/immersiondiscordapp
+module github.com/umlcloudcomputing/immersion/discordapp
 
 go 1.23.4
 

@@ -2,7 +2,7 @@ FROM golang:1.23
 
 WORKDIR /asset
 
-COPY go.mod go.sum ./
+COPY go.mod ./
 
 RUN go mod download && go mod verify
 
