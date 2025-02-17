@@ -16,3 +16,17 @@ The `cdk.json` file tells the CDK toolkit how to execute your app.
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
  * `go test`         run unit tests
+
+
+## API Architecture
+
+Fundamentally a set of lambda functions to periodically pull and synchronize data from Engage
+
+Key traits:
+- Data objects and their dependencies are shared layers in the Lambda functions in order to keep them light
+- Lambda functions will populate to a Dynamo DB table
+
+
+## Infrastructure
+![Project Infrastructure](https://media.discordapp.net/attachments/1041436332402167879/1329181171804012675/image.png?ex=67b440ae&is=67b2ef2e&hm=2ae986180a84cf2f87cda6be60a08e25171174a2da865ec590558344f2f2ea3e&=&format=webp&quality=lossless&width=960&height=473)
+

@@ -36,8 +36,6 @@ class Organization:
         self.orgName = self.orgData['items'][0]['name']
         self.primaryContact = PrimaryContact(self.orgData['items'][0]['primaryContactId'])
 
-    
-    # TODO
     # Send authentication code to primary contact
     # def authenticate(self):
     
