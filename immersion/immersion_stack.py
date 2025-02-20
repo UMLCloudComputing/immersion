@@ -9,9 +9,12 @@ from aws_cdk import (
     aws_ecs_patterns as ecs_patterns,
     aws_sqs as sqs,
     aws_cloudwatch as cw,
-    aws_autoscaling as autoscaling
+    aws_autoscaling as autoscaling,
+    aws_applicationautoscaling as appautoscaling,
+
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
+from aws_cdk.aws_cloudwatch_actions import ApplicationScalingAction
 from constructs import Construct
 from dotenv import load_dotenv
 import os
@@ -27,21 +30,31 @@ class ImmersionStack(Stack):
         queue = sqs.Queue(
             self,
             f'{os.getenv('APP_NAME')}DataQueue',
-            queue_name=f'{os.getenv('APP_NAME')}_Data_Queue'
+            queue_name=f'{os.getenv('APP_NAME')}_Data_Queue',
         )
 
         scale_metric = queue.metric_approximate_number_of_messages_visible(
-            period=Duration.minutes(5),
-            statistic="Average"
+            period=Duration.minutes(1),
+            statistic="Average",
         )
 
         scale_out_alarm = scale_metric.create_alarm(
             self,
-            f'{os.getenv('APP_NAME')}DataProcessScaleOutAlarm',
+            f'{os.getenv('APP_NAME')}DataParserScaleOutAlarm',
             alarm_name=f'{os.getenv('APP_NAME')}DataProcessScaleOutAlarm',
+            threshold=1, 
+            evaluation_periods=1,
+            comparison_operator=cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+            treat_missing_data=cw.TreatMissingData.NOT_BREACHING
+        )
+
+        scale_in_alarm = scale_metric.create_alarm(
+            self,
+            f'{os.getenv('APP_NAME')}DataParserScaleInAlarm',
+            alarm_name=f'{os.getenv('APP_NAME')}DataParserScaleInAlarm',
             threshold=0,
             evaluation_periods=1,
-            comparison_operator=cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+            comparison_operator=cw.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
             treat_missing_data=cw.TreatMissingData.NOT_BREACHING
         )
 
@@ -87,29 +100,81 @@ class ImmersionStack(Stack):
         )
 
         # Data Parser Task Definition
-        parser_service = ecs_patterns.QueueProcessingFargateService(
+        parser_task_definition = ecs.FargateTaskDefinition(
             self,
-            f'{os.getenv('APP_NAME')}DataParserService',
+            f'{os.getenv('APP_NAME')}DataParserTasj',
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
-            # TODO: REFACTOR TO USE GITHUB CONTAINER REGISTRY!!!
+        )
+
+        parser_task_definition.add_container(
+            f'{os.getenv('APP_NAME')}DataParser',
+            # TODO: REFACTOR TO USE GITHUB CONTAINER REGISTRY!
             image=ecs.ContainerImage.from_docker_image_asset( 
                 DockerImageAsset(
                     self,
                     f'{os.getenv('APP_NAME')}DataParserImage',
                     directory='src/data_parser/'
                 )
-            ),
-            min_scaling_capacity=0,
-            max_scaling_capacity=1,
-            cluster=cluster,
-            queue=queue,
-            scaling_steps=[ # NEEDS TO BE PLAYED AROUND WITH
-                {'upper': 0, 'change': -1},
-                {'lower': 1, 'change': 1},
-            ],
-            cooldown=Duration.seconds(5) # TODO: ADJUST
+            )
         )
+
+        parser_service = ecs.FargateService(
+            self,
+            f'{os.getenv('APP_NAME')}DataParserService',
+            cluster=cluster,
+            task_definition=parser_task_definition
+        )
+
+        # Scale metrics for data parser service
+        scaling_target = appautoscaling.ScalableTarget(
+            self,
+            id=f'{os.getenv('APP_NAME')}ParserScalingTarget',
+            service_namespace=appautoscaling.ServiceNamespace.ECS,
+            scalable_dimension='ecs:service:DesiredCount',
+            min_capacity=0,
+            max_capacity=1,
+            resource_id=f'service/{parser_service.cluster.cluster_name}/{parser_service.service_name}'
+        )
+
+        scale_out_action = appautoscaling.StepScalingAction(
+            self,
+            'ParserScaleOutAction',
+            scaling_target=scaling_target,
+            adjustment_type=appautoscaling.AdjustmentType.EXACT_CAPACITY,
+        )
+
+        scale_out_action.add_adjustment(
+            adjustment=1,
+            lower_bound=0
+        )
+
+        
+        scale_out_action.add_adjustment(
+            adjustment=0,
+            upper_bound=0
+        )
+
+        scale_out_alarm.add_alarm_action(ApplicationScalingAction(scale_out_action))
+
+        scale_in_action = appautoscaling.StepScalingAction(
+            self,
+            'ParserScaleInAction',
+            scaling_target=scaling_target,
+            adjustment_type=appautoscaling.AdjustmentType.EXACT_CAPACITY,
+        )
+
+        scale_in_action.add_adjustment(
+            adjustment=0,
+            lower_bound=0,
+        )
+
+        scale_in_action.add_adjustment(
+            adjustment=1,
+            upper_bound=0,
+        )
+
+        scale_in_alarm.add_alarm_action(ApplicationScalingAction(scale_in_action))
 
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
