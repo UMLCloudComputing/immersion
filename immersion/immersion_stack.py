@@ -2,19 +2,17 @@ from aws_cdk import (
     # Duration,
     Stack,
     Duration,
-    aws_autoscaling as autoscaling,
     aws_dynamodb as dynamodb,
     aws_ec2 as ec2,
     aws_ecs as ecs,
-    aws_ecs_patterns as ecs_patterns,
     aws_sqs as sqs,
     aws_cloudwatch as cw,
-    aws_autoscaling as autoscaling,
     aws_applicationautoscaling as appautoscaling,
-
+    aws_lambda_python_alpha as lambda_python
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
 from aws_cdk.aws_cloudwatch_actions import ApplicationScalingAction
+from aws_cdk.aws_lambda import Runtime
 from constructs import Construct
 from dotenv import load_dotenv
 import os
@@ -175,6 +173,15 @@ class ImmersionStack(Stack):
         )
 
         scale_in_alarm.add_alarm_action(ApplicationScalingAction(scale_in_action))
+
+        # Data Filter Lambda Functions
+        lambda_python.PythonFunction(
+            self,
+            f'{os.getenv('APP_NAME')}',
+            runtime=Runtime.PYTHON_3_13,
+            entry='src/data_filters/club_information',
+            handler='lambda_handler'
+        )
 
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
