@@ -175,13 +175,17 @@ class ImmersionStack(Stack):
         scale_in_alarm.add_alarm_action(ApplicationScalingAction(scale_in_action))
 
         # Data Filter Lambda Functions
-        lambda_python.PythonFunction(
+        club_information_lambda = lambda_python.PythonFunction(
             self,
             f'{os.getenv('APP_NAME')}',
             runtime=Runtime.PYTHON_3_13,
             entry='src/data_filters/club_information',
-            handler='lambda_handler'
+            handler='lambda_handler',
+            environment={
+                'QUEUE_URL': queue.queue_url
+            }
         )
+        queue.grant_send_messages(club_information_lambda)
 
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
