@@ -1,4 +1,5 @@
 aws-cdk-lib==2.164.1
+aws_cdk.aws_lambda_python_alpha
 constructs>=10.0.0,<11.0.0
 python-dotenv
 boto3

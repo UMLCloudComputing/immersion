@@ -96,11 +96,15 @@ class ImmersionStack(Stack):
             cluster=cluster,
             task_definition=app_task_defintion
         )
+        
+        parser_logging = ecs.AwsLogDriver(
+            stream_prefix='parserlogs'
+        )
 
         # Data Parser Task Definition
         parser_task_definition = ecs.FargateTaskDefinition(
             self,
-            f'{os.getenv('APP_NAME')}DataParserTasj',
+            f'{os.getenv('APP_NAME')}DataParserTask',
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
@@ -112,10 +116,15 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f'{os.getenv('APP_NAME')}DataParserImage',
-                    directory='src/data_parser/'
+                    directory='src/data_parser/',
                 )
-            )
+            ),
+            environment={
+                'QUEUE_URL': queue.queue_url,
+            },
+            logging=parser_logging,
         )
+        queue.grant_consume_messages(parser_task_definition.task_role)
 
         parser_service = ecs.FargateService(
             self,
