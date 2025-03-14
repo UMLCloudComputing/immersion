@@ -6,14 +6,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
 func main() {
-	// TODO: add processing logic
-	//queueUrl := os.Getenv("QUEUE_URL")
+	queueUrl := os.Getenv("QUEUE_URL")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -21,18 +19,21 @@ func main() {
 	}
 	client := sqs.NewFromConfig(cfg)
 
+	// there will probably be a main loop where you do this first every time this program should run until there is nothing in the queue
 	message, err := client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
-		QueueUrl:            aws.String("https://sqs.us-east-1.amazonaws.com/840414111995/Immersion_Data_Queue"),
-		MaxNumberOfMessages: 5,
+		QueueUrl:            &queueUrl,
+		MaxNumberOfMessages: 1,
+		WaitTimeSeconds:     10,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// TODO define message structure and parse for that
 	for _, e := range message.Messages {
 		fmt.Println(*e.Body)
 		_, err := client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
-			QueueUrl:      aws.String("https://sqs.us-east-1.amazonaws.com/840414111995/Immersion_Data_Queue"),
+			QueueUrl:      &queueUrl,
 			ReceiptHandle: e.ReceiptHandle,
 		})
 		if err != nil {
@@ -40,6 +41,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("Parsing complete.")
-	os.Exit(0)
+	fmt.Println("Parsing complete, waiting to be killed.")
+	wait := make(chan bool)
+	<-wait
 }
