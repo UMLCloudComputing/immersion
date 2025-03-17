@@ -19,22 +19,32 @@ func main() {
 	}
 	client := sqs.NewFromConfig(cfg)
 
-	// there will probably be a main loop where you do this first every time this program should run until there is nothing in the queue
-	message, err := client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
+	response, err := client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
 		QueueUrl:            &queueUrl,
-		MaxNumberOfMessages: 1,
-		WaitTimeSeconds:     10,
+		MaxNumberOfMessages: 5, // play around with these
+		WaitTimeSeconds:     5,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO define message structure and parse for that
-	for _, e := range message.Messages {
-		fmt.Println(*e.Body)
-		_, err := client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
-			QueueUrl:      &queueUrl,
-			ReceiptHandle: e.ReceiptHandle,
+	// print and delete all messages in the queue
+	for len(response.Messages) > 0 {
+		for _, e := range response.Messages {
+			fmt.Println(*e.Body)
+			_, err = client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
+				QueueUrl:      &queueUrl,
+				ReceiptHandle: e.ReceiptHandle,
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		response, err = client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
+			QueueUrl:            &queueUrl,
+			MaxNumberOfMessages: 5,
+			WaitTimeSeconds:     5,
 		})
 		if err != nil {
 			log.Fatal(err)
