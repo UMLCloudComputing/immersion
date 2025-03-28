@@ -8,6 +8,7 @@ from aws_cdk import (
     aws_sqs as sqs,
     aws_cloudwatch as cw,
     aws_applicationautoscaling as appautoscaling,
+    aws_lambda as _lambda,
     aws_lambda_python_alpha as lambda_python
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
@@ -23,6 +24,31 @@ class ImmersionStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # DynamoDB Table Definitions
+        serverTable = dynamodb.TableV2(
+            self, 
+            f'{os.getenv('APP_NAME')}ServerTable',
+            partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
+        )
+
+        organizationTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}OrganizationTable',
+            partition_key=dynamodb.Attribute(name='organizationId', type=dynamodb.AttributeType.STRING)
+        )
+
+        cacheTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}APICacheTable',
+            partition_key=dynamodb.Attribute(name='clubId', type=dynamodb.AttributeType.STRING),
+        )
+
+        eventTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}EventTable',
+            partition_key=dynamodb.Attribute(name='eventId', type=dynamodb.AttributeType.STRING),
+        )
 
         # SQS Queue and Size Metric Defintion
         queue = sqs.Queue(
@@ -121,10 +147,12 @@ class ImmersionStack(Stack):
             ),
             environment={
                 'QUEUE_URL': queue.queue_url,
+                'ORGANIZATION_TABLE': organizationTable.table_name,
             },
             logging=parser_logging,
         )
         queue.grant_consume_messages(parser_task_definition.task_role)
+        organizationTable.grant_write_data(parser_task_definition.task_role)
 
         parser_service = ecs.FargateService(
             self,
@@ -183,37 +211,22 @@ class ImmersionStack(Stack):
 
         scale_in_alarm.add_alarm_action(ApplicationScalingAction(scale_in_action))
 
+        # TODO: figure out how to make a layer for python dependencies
+        # filter_layer = _lambda.LayerVersion(
+        #     self,
+        #     f'{os.getenv('APP_NAME')}FilterLayer',
+            
+        # )
+
         # Data Filter Lambda Functions
         club_information_lambda = lambda_python.PythonFunction(
             self,
-            f'{os.getenv('APP_NAME')}',
+            f'{os.getenv('APP_NAME')}ClubInformationLambda',
             runtime=Runtime.PYTHON_3_13,
             entry='src/data_filters/club_information',
             handler='lambda_handler',
             environment={
                 'QUEUE_URL': queue.queue_url
-            }
+            },
         )
         queue.grant_send_messages(club_information_lambda)
-
-        # DynamoDB Table Definitions
-        serverTable = dynamodb.TableV2(
-            self, 
-            f'{os.getenv('APP_NAME')}ServerTable',
-            partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
-
-        cacheTable = dynamodb.TableV2(
-            self,
-            f'{os.getenv('APP_NAME')}APICacheTable',
-            partition_key=dynamodb.Attribute(name='clubId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
-
-        eventTable = dynamodb.TableV2(
-            self,
-            f'{os.getenv('APP_NAME')}EventTable',
-            partition_key=dynamodb.Attribute(name='eventId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
