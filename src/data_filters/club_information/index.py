@@ -4,20 +4,24 @@ import requests
 import os
 
 # Parse a single organization to extract only important info
-def parse_info(item):
+def parse_info(item, numMembers):
     data = {
         "OrgId": item['id'],
         "Name": item['name'],
-        "PrimaryContact": item['PrimaryContactId']['campusEmail'],
+        "PrimaryContactEmail": item['primaryContactId']['campusEmail'],
         "ImageUrl": f"https://se-images.campuslabs.com/clink/images/{item['profilePicture']}",
-        "WebsiteKey": f"https://umasslowellclubs.campuslabs.com/engage/organization/{item['websiteKey']}"
+        "WebsiteKey": f"https://umasslowellclubs.campuslabs.com/engage/organization/{item['websiteKey']}",
+        "NumMembers": numMembers,
+        "settings": json.dumps({}),
     }
 
     return data
 
+# Similar to onboard variant, provides more info into table
 def lambda_handler(event, context):
     # Constants
-    api_endpoint = "https://engage-api.campuslabs.com/api/v3.0/organizations/organization?includeCategories=false&includeContactInfo=true&includeSocialMedia=false&isAdminOnly=false&isBranch=false&isShownInPublicDirectory=true"
+    api_endpoint_main = f"https://engage-api.campuslabs.com/api/v3.0/organizations/organization?includeCategories=false&includeContactInfo=true&includeSocialMedia=false&isAdminOnly=false&isBranch=false&isShownInPublicDirectory=true&id={event["body"]["id"]}"
+    api_endpoint_member_count = f"https://engage-api.campuslabs.com/api/v3.0/organizations/organization/{event["body"]["id"]}/roster"
 
     # Service configuration
     sqs = boto3.client('sqs')
@@ -35,17 +39,17 @@ def lambda_handler(event, context):
     }
 
     try:
-        response = requests.get(api_endpoint, headers=headers)
+        # Try both
+        response_main = requests.get(api_endpoint_main, headers=headers)
+        response_membercount = requests.get(api_endpoint_member_count, headers=headers)
 
         # Process response from API
-        data = response.json()
-        parsed_data = []
-        for item in data['items']:
-            parsed_data.append(parse_info(item))
+        data_main = response_main.json()
+        member_count = float(response_membercount.json()['totalItems'])
         
         return_data = {
             "Header": "club_information",
-            "Body": json.dumps(parsed_data)
+            "Body": [parse_info(data_main['items'][0], member_count)]
         }
         sqs.send_message(
             QueueUrl=os.getenv('QUEUE_URL'),
