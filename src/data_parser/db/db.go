@@ -14,7 +14,7 @@ var (
 	OrganizationTableName = os.Getenv("ORGANIZATION_TABLE")
 )
 
-func InsertOrganization(ctx context.Context, db *dynamodb.Client, org models.Organization) {
+func InsertOnboarding(ctx context.Context, db *dynamodb.Client, org models.Onboarding) {
 	item, err := attributevalue.MarshalMap(org)
 	if err != nil {
 		log.Fatal(item)

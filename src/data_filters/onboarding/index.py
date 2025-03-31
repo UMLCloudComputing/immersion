@@ -8,7 +8,7 @@ def parse_info(item):
     data = {
         "OrgId": item['id'],
         "Name": item['name'],
-        "PrimaryContact": item['PrimaryContactId']['campusEmail'],
+        "PrimaryContact": item['primaryContactId']['campusEmail'],
         "ImageUrl": f"https://se-images.campuslabs.com/clink/images/{item['profilePicture']}",
         "WebsiteKey": f"https://umasslowellclubs.campuslabs.com/engage/organization/{item['websiteKey']}"
     }
@@ -30,8 +30,8 @@ def lambda_handler(event, context):
     # Define headers with API key
     api_key = response['Parameter']['Value']
     headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json'
+        'X-Engage-Api-Key': api_key,
+        'accept': 'application/json'
     }
 
     try:
@@ -44,11 +44,12 @@ def lambda_handler(event, context):
             parsed_data.append(parse_info(item))
         
         return_data = {
-            "Header": "club_information",
-            "Body": json.dumps(parsed_data)
+            "Header": "onboarding",
+            "Body": parsed_data
         }
+
         sqs.send_message(
-            QueueUrl=os.getenv('QUEUE_URL'),
+            QueueUrl=f'{os.getenv('QUEUE_URL')}',
             MessageBody=json.dumps(return_data)
         )
     except requests.exceptions.RequestException as e:

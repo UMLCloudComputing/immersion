@@ -9,7 +9,8 @@ from aws_cdk import (
     aws_cloudwatch as cw,
     aws_applicationautoscaling as appautoscaling,
     aws_lambda as _lambda,
-    aws_lambda_python_alpha as lambda_python
+    aws_lambda_python_alpha as lambda_python,
+    aws_ssm as ssm
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
 from aws_cdk.aws_cloudwatch_actions import ApplicationScalingAction
@@ -32,10 +33,10 @@ class ImmersionStack(Stack):
             partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
         )
 
-        organizationTable = dynamodb.TableV2(
+        onboardingTable = dynamodb.TableV2(
             self,
             f'{os.getenv('APP_NAME')}OrganizationTable',
-            partition_key=dynamodb.Attribute(name='organizationId', type=dynamodb.AttributeType.STRING)
+            partition_key=dynamodb.Attribute(name='organizationId', type=dynamodb.AttributeType.NUMBER)
         )
 
         cacheTable = dynamodb.TableV2(
@@ -147,12 +148,12 @@ class ImmersionStack(Stack):
             ),
             environment={
                 'QUEUE_URL': queue.queue_url,
-                'ORGANIZATION_TABLE': organizationTable.table_name,
+                'ORGANIZATION_TABLE': onboardingTable.table_name,
             },
             logging=parser_logging,
         )
         queue.grant_consume_messages(parser_task_definition.task_role)
-        organizationTable.grant_write_data(parser_task_definition.task_role)
+        onboardingTable.grant_write_data(parser_task_definition.task_role)
 
         parser_service = ecs.FargateService(
             self,
@@ -219,14 +220,21 @@ class ImmersionStack(Stack):
         # )
 
         # Data Filter Lambda Functions
+        engage_api_key_param = ssm.StringParameter.from_secure_string_parameter_attributes(
+            self,
+            f'{os.getenv('APP_NAME')}APIKEY',
+            parameter_name=f'{os.getenv('SSM_PARAMETER_NAME_API')}'
+        )
+        
         club_information_lambda = lambda_python.PythonFunction(
             self,
             f'{os.getenv('APP_NAME')}ClubInformationLambda',
             runtime=Runtime.PYTHON_3_13,
-            entry='src/data_filters/club_information',
+            entry='src/data_filters/onboarding',
             handler='lambda_handler',
             environment={
                 'QUEUE_URL': queue.queue_url
             },
         )
         queue.grant_send_messages(club_information_lambda)
+        engage_api_key_param.grant_read(club_information_lambda)

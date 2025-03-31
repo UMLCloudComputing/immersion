@@ -1,16 +1,12 @@
 package models
 
-type Message struct {
+type Message[T any] struct {
 	Header string `json:"header"`
-	Body   string `json:"body"`
+	Body   T      `json:"body"`
 }
 
-type OrganizationResponse struct {
-	Organizations []Organization
-}
-
-type Organization struct {
-	OrgId          string `json:"OrgId" dynamodbav:"organizationId"`
+type Onboarding struct {
+	OrgId          int    `json:"OrgId" dynamodbav:"organizationId"`
 	Name           string `json:"Name" dynamodbav:"name"`
 	PrimaryContact string `json:"PrimaryContact" dynamodbav:"primaryContact"`
 	ImageUrl       string `json:"ImageUrl" dynamodbav:"imageUrl"`

@@ -15,22 +15,24 @@ import (
 )
 
 func parseMessage(dbClient *dynamodb.Client, message string) {
-	var parsedMessage models.Message
+	var parsedMessage models.Message[any]
 	err := json.Unmarshal([]byte(message), &parsedMessage)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fmt.Printf("Parsed a message with the %s header\n", parsedMessage.Header)
+
 	switch parsedMessage.Header {
-	case "organization":
-		var organizationData models.OrganizationResponse
-		err = json.Unmarshal([]byte(parsedMessage.Body), &organizationData)
+	case "onboarding":
+		var onboardingData models.Message[[]models.Onboarding]
+		err = json.Unmarshal([]byte(message), &onboardingData)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		for _, v := range organizationData.Organizations {
-			db.InsertOrganization(context.TODO(), dbClient, v)
+		for _, v := range onboardingData.Body {
+			db.InsertOnboarding(context.TODO(), dbClient, v)
 		}
 	}
 }
