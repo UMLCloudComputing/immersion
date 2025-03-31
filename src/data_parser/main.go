@@ -2,13 +2,40 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/umlcloudcomputing/immersion/dataparser/db"
+	"github.com/umlcloudcomputing/immersion/dataparser/models"
 )
+
+func parseMessage(dbClient *dynamodb.Client, message string) {
+	var parsedMessage models.Message[any]
+	err := json.Unmarshal([]byte(message), &parsedMessage)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Parsed a message with the %s header\n", parsedMessage.Header)
+
+	switch parsedMessage.Header {
+	case "onboarding":
+		var onboardingData models.Message[[]models.Onboarding]
+		err = json.Unmarshal([]byte(message), &onboardingData)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, v := range onboardingData.Body {
+			db.InsertOnboarding(context.TODO(), dbClient, v)
+		}
+	}
+}
 
 func main() {
 	queueUrl := os.Getenv("QUEUE_URL")
@@ -17,9 +44,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := sqs.NewFromConfig(cfg)
 
-	response, err := client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
+	sqsClient := sqs.NewFromConfig(cfg)
+	dbClient := dynamodb.NewFromConfig(cfg)
+
+	response, err := sqsClient.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
 		QueueUrl:            &queueUrl,
 		MaxNumberOfMessages: 5, // play around with these
 		WaitTimeSeconds:     5,
@@ -30,18 +59,19 @@ func main() {
 
 	// print and delete all messages in the queue
 	for len(response.Messages) > 0 {
-		for _, e := range response.Messages {
-			fmt.Println(*e.Body)
-			_, err = client.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
+		for _, v := range response.Messages {
+
+			parseMessage(dbClient, *v.Body)
+			_, err = sqsClient.DeleteMessage(context.TODO(), &sqs.DeleteMessageInput{
 				QueueUrl:      &queueUrl,
-				ReceiptHandle: e.ReceiptHandle,
+				ReceiptHandle: v.ReceiptHandle,
 			})
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 
-		response, err = client.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
+		response, err = sqsClient.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
 			QueueUrl:            &queueUrl,
 			MaxNumberOfMessages: 5,
 			WaitTimeSeconds:     5,
