@@ -5,7 +5,7 @@ import os
 
 # Parse a single organization to extract only important info
 def parse_info(item, numMembers):
-    data = {
+    return {
         "OrgId": item['id'],
         "Name": item['name'],
         "PrimaryContact": item['primaryContactId']['campusEmail'],
@@ -15,7 +15,6 @@ def parse_info(item, numMembers):
         "settings": json.dumps({}),
     }
 
-    return data
 
 # Similar to onboard variant, provides more info into table
 def lambda_handler(event, context):
@@ -40,12 +39,14 @@ def lambda_handler(event, context):
 
     try:
         # Try both
+        # Get primary club data
         response_main = requests.get(api_endpoint_main, headers=headers)
-        response_membercount = requests.get(api_endpoint_member_count, headers=headers)
+        # Get member count for club in seperate API call
+        response_member_count = requests.get(api_endpoint_member_count, headers=headers)
 
         # Process response from API
         data_main = response_main.json()
-        member_count = float(response_membercount.json()['totalItems'])
+        member_count = float(response_member_count.json()['totalItems'])
         
         return_data = {
             "Header": "club_information",
