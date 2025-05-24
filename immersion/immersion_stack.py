@@ -84,9 +84,10 @@ class ImmersionStack(Stack):
         )
 
         # Container Cluster Component Defintion
-        vpc = ec2.Vpc(
+        vpc = ec2.Vpc.from_lookup(
             self,
-            f'{os.getenv('APP_NAME')}VPC',
+            'VPC',
+            vpc_name='Club-VPC'
         )
 
         cluster = ecs.Cluster(
@@ -104,7 +105,7 @@ class ImmersionStack(Stack):
         )
 
         app_task_defintion.add_container(
-            f'{os.getenv('APP_NAME')}DiscordApp', 
+            f'{os.getenv('APP_NAME')}DiscordApp',
             image=ecs.ContainerImage.from_docker_image_asset(
                 DockerImageAsset(
                     self,
@@ -121,7 +122,8 @@ class ImmersionStack(Stack):
             self,
             f'{os.getenv('APP_NAME')}DiscordAppService',
             cluster=cluster,
-            task_definition=app_task_defintion
+            task_definition=app_task_defintion,
+            assign_public_ip=True
         )
         
         parser_logging = ecs.AwsLogDriver(
@@ -159,7 +161,8 @@ class ImmersionStack(Stack):
             self,
             f'{os.getenv('APP_NAME')}DataParserService',
             cluster=cluster,
-            task_definition=parser_task_definition
+            task_definition=parser_task_definition,
+            assign_public_ip=True
         )
 
         # Scale metrics for data parser service
