@@ -21,10 +21,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Install CDK CLI with nodejs
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
+        name: Install nodejs
         with: 
           node-version: 20
+      - name: Install CDK CLI with nodejs
         run: | 
           npm install -g aws-cdk
 
