@@ -30,6 +30,6 @@ jobs:
 
       - name: Build the CDK stack using the aws profile
         run: |
-          cd immersion/
+          cd immersion/dev-stack
           cdk deploy --require-approval never
 
