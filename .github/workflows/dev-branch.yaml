@@ -26,9 +26,10 @@ jobs:
         with: 
           node-version: 20
         run: | 
-
+          npm install -g aws-cdk
 
       - name: Build the CDK stack using the aws profile
         run: |
-          cdk bootsrap
+          cd immersion/
+          cdk deploy --require-approval never
 
