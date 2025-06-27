@@ -66,7 +66,7 @@ class ImmersionStack(Stack):
         scale_out_alarm = scale_metric.create_alarm(
             self,
             f"{os.getenv('APP_NAME')}DataParserScaleOutAlarm",
-            alarm_name=f'{os.getenv('APP_NAME')}DataProcessScaleOutAlarm',
+            alarm_name=f"{os.getenv('APP_NAME')}DataProcessScaleOutAlarm",
             threshold=1, 
             evaluation_periods=1,
             comparison_operator=cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -76,7 +76,7 @@ class ImmersionStack(Stack):
         scale_in_alarm = scale_metric.create_alarm(
             self,
             f"{os.getenv('APP_NAME')}DataParserScaleInAlarm",
-            alarm_name=f'{os.getenv('APP_NAME')}DataParserScaleInAlarm',
+            alarm_name=f"{os.getenv('APP_NAME')}DataParserScaleInAlarm",
             threshold=0,
             evaluation_periods=1,
             comparison_operator=cw.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
