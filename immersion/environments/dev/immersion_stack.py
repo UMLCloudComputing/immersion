@@ -29,7 +29,7 @@ class ImmersionStack(Stack):
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
             self, 
-            f'{os.getenv('APP_NAME')}ServerTable',
+            f"{os.getenv('APP_NAME')}ServerTable",
             partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
         )
 
