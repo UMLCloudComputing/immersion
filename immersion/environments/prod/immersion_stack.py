@@ -55,7 +55,7 @@ class ImmersionStack(Stack):
         queue = sqs.Queue(
             self,
             f"{os.getenv('APP_NAME')}DataQueue",
-            queue_name=f'{os.getenv('APP_NAME')}_Data_Queue',
+            queue_name=f"{os.getenv('APP_NAME')}_Data_Queue",
         )
 
         scale_metric = queue.metric_approximate_number_of_messages_visible(
