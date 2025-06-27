@@ -18,8 +18,8 @@ jobs:
       - name: Configure AWS profile
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.STS_ASSUME_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.STS_ASSUME_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
       - uses: actions/setup-node@v4
         name: Install nodejs
         with: 
