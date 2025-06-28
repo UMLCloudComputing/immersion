@@ -26,6 +26,30 @@ class ImmersionStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        if os.getenv('CI') == "true":
+            APP_NAME = ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "CI_APP_NAME",
+                parameter_name="/immersion/app_name"
+                )
+            
+            DISCORD_TOKEN = ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "DISCORD_TOKEN",
+                parameter_name="/immersion/discord_token"
+                )
+        else:
+            APP_NAME = os.getenv('APP_NAME')
+            DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+        
+        SSM_PARAMETER_NAME_API = ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "SSM_PARAMETER_NAME_API",
+                parameter_name="engage_api_key_test"
+                )
+
+        os.exit() # for now
+                        
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
             self, 
