@@ -8,7 +8,9 @@ from aws_cdk import (
     aws_sqs as sqs,
     aws_cloudwatch as cw,
     aws_applicationautoscaling as appautoscaling,
-    aws_lambda_python_alpha as lambda_python
+    aws_lambda as _lambda,
+    aws_lambda_python_alpha as lambda_python,
+    aws_ssm as ssm
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
 from aws_cdk.aws_cloudwatch_actions import ApplicationScalingAction
@@ -23,6 +25,31 @@ class ImmersionStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # DynamoDB Table Definitions
+        serverTable = dynamodb.TableV2(
+            self, 
+            f'{os.getenv('APP_NAME')}ServerTable',
+            partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
+        )
+
+        onboardingTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}OrganizationTable',
+            partition_key=dynamodb.Attribute(name='organizationId', type=dynamodb.AttributeType.NUMBER)
+        )
+
+        cacheTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}APICacheTable',
+            partition_key=dynamodb.Attribute(name='clubId', type=dynamodb.AttributeType.STRING),
+        )
+
+        eventTable = dynamodb.TableV2(
+            self,
+            f'{os.getenv('APP_NAME')}EventTable',
+            partition_key=dynamodb.Attribute(name='eventId', type=dynamodb.AttributeType.STRING),
+        )
 
         # SQS Queue and Size Metric Defintion
         queue = sqs.Queue(
@@ -57,9 +84,10 @@ class ImmersionStack(Stack):
         )
 
         # Container Cluster Component Defintion
-        vpc = ec2.Vpc(
+        vpc = ec2.Vpc.from_lookup(
             self,
-            f'{os.getenv('APP_NAME')}VPC',
+            'VPC',
+            vpc_name='Club-VPC'
         )
 
         cluster = ecs.Cluster(
@@ -77,7 +105,7 @@ class ImmersionStack(Stack):
         )
 
         app_task_defintion.add_container(
-            f'{os.getenv('APP_NAME')}DiscordApp', 
+            f'{os.getenv('APP_NAME')}DiscordApp',
             image=ecs.ContainerImage.from_docker_image_asset(
                 DockerImageAsset(
                     self,
@@ -94,13 +122,18 @@ class ImmersionStack(Stack):
             self,
             f'{os.getenv('APP_NAME')}DiscordAppService',
             cluster=cluster,
-            task_definition=app_task_defintion
+            task_definition=app_task_defintion,
+            assign_public_ip=True
+        )
+        
+        parser_logging = ecs.AwsLogDriver(
+            stream_prefix='parserlogs'
         )
 
         # Data Parser Task Definition
         parser_task_definition = ecs.FargateTaskDefinition(
             self,
-            f'{os.getenv('APP_NAME')}DataParserTasj',
+            f'{os.getenv('APP_NAME')}DataParserTask',
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
@@ -112,16 +145,24 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f'{os.getenv('APP_NAME')}DataParserImage',
-                    directory='src/data_parser/'
+                    directory='src/data_parser/',
                 )
-            )
+            ),
+            environment={
+                'QUEUE_URL': queue.queue_url,
+                'ORGANIZATION_TABLE': onboardingTable.table_name,
+            },
+            logging=parser_logging,
         )
+        queue.grant_consume_messages(parser_task_definition.task_role)
+        onboardingTable.grant_write_data(parser_task_definition.task_role)
 
         parser_service = ecs.FargateService(
             self,
             f'{os.getenv('APP_NAME')}DataParserService',
             cluster=cluster,
-            task_definition=parser_task_definition
+            task_definition=parser_task_definition,
+            assign_public_ip=True
         )
 
         # Scale metrics for data parser service
@@ -174,33 +215,29 @@ class ImmersionStack(Stack):
 
         scale_in_alarm.add_alarm_action(ApplicationScalingAction(scale_in_action))
 
+        # TODO: figure out how to make a layer for python dependencies
+        # filter_layer = _lambda.LayerVersion(
+        #     self,
+        #     f'{os.getenv('APP_NAME')}FilterLayer',
+            
+        # )
+
         # Data Filter Lambda Functions
-        lambda_python.PythonFunction(
+        engage_api_key_param = ssm.StringParameter.from_secure_string_parameter_attributes(
             self,
-            f'{os.getenv('APP_NAME')}',
+            f'{os.getenv('APP_NAME')}APIKEY',
+            parameter_name=f'{os.getenv('SSM_PARAMETER_NAME_API')}'
+        )
+        
+        club_information_lambda = lambda_python.PythonFunction(
+            self,
+            f'{os.getenv('APP_NAME')}ClubInformationLambda',
             runtime=Runtime.PYTHON_3_13,
-            entry='src/data_filters/club_information',
-            handler='lambda_handler'
+            entry='src/data_filters/onboarding',
+            handler='lambda_handler',
+            environment={
+                'QUEUE_URL': queue.queue_url
+            },
         )
-
-        # DynamoDB Table Definitions
-        serverTable = dynamodb.TableV2(
-            self, 
-            f'{os.getenv('APP_NAME')}ServerTable',
-            partition_key=dynamodb.Attribute(name='serverId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
-
-        cacheTable = dynamodb.TableV2(
-            self,
-            f'{os.getenv('APP_NAME')}APICacheTable',
-            partition_key=dynamodb.Attribute(name='clubId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
-
-        eventTable = dynamodb.TableV2(
-            self,
-            f'{os.getenv('APP_NAME')}EventTable',
-            partition_key=dynamodb.Attribute(name='eventId', type=dynamodb.AttributeType.STRING),
-            deletion_protection=True
-        )
+        queue.grant_send_messages(club_information_lambda)
+        engage_api_key_param.grant_read(club_information_lambda)

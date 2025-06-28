@@ -1,0 +1,28 @@
+{
+  "vpc-provider:account=840414111995:filter.tag:Name=Club-VPC:region=us-east-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-031449cf5f23e70a5",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "ownerAccountId": "840414111995",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-09c9eff113c760d5a",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "us-east-1a",
+            "routeTableId": "rtb-091515db4fcca31fb"
+          },
+          {
+            "subnetId": "subnet-07e3ceec69113c347",
+            "cidr": "10.0.2.0/24",
+            "availabilityZone": "us-east-1b",
+            "routeTableId": "rtb-0b41f7fb788fad073"
+          }
+        ]
+      }
+    ]
+  }
+}

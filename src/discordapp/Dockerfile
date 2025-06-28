@@ -1,13 +1,7 @@
-FROM golang:1.23
-
-WORKDIR /asset
-
-COPY go.mod go.sum ./
-
-RUN go mod download && go mod verify
+FROM python:3.13-alpine
 
 COPY . .
 
-RUN go build -o /usr/local/bin/app ./...
+RUN pip install -r requirements.txt
 
-CMD ["app"]
+CMD ["python", "./app.py"]

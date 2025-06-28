@@ -8,6 +8,6 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build -o /usr/local/bin/app ./...
+RUN go build -o /usr/local/bin/app/ ./...
 
-CMD ["app"]
+CMD ["/usr/local/bin/app/dataparser"]
