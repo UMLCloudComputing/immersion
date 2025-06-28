@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .immersion-gradient {
+    @apply bg-gradient-to-r from-custom-purple via-discord-purple to-custom-cyan;
+  }
+
+  .immersion-gradient-v {
+    @apply bg-gradient-to-b from-custom-purple via-discord-purple to-custom-cyan;
+  }
+
+  .animate-spin-once {
+  animation: spin 1500ms forwards;
+
+    @keyframes spin {
+    0% {
+      transform: rotate(0deg)
+    }
+    100% {
+      transform: rotate(360deg)
+    }
+    }
+  }
+}
