@@ -48,7 +48,6 @@ class ImmersionStack(Stack):
                 parameter_name="engage_api_key_test"
                 )
 
-        os._exit() # for now
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
