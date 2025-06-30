@@ -7,27 +7,36 @@ on:
 jobs:
   dev-deploy-to-aws:
     runs-on: ubuntu-latest
+    env:
+      CICD_ACCOUNT_ID: ${{ secrets.CICD_ACCOUNT_ID }}
+      
     permissions:
       id-token: write
       contents: read
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         name: Set up python
         with: 
           python-version: 3.11
+
       - name: Install python dependencies
         run: pip install -r requirements.txt
+
       - name: Configure AWS profile
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.STS_ASSUME_ROLE_ARN }}
           role-session-name: github-actions-cfn-deploy
           aws-region: ${{ vars.AWS_REGION }}
+
       - uses: actions/setup-node@v4
         name: Install nodejs
         with: 
           node-version: 20
+
       - name: Install CDK CLI with nodejs
         run: | 
           npm install -g aws-cdk

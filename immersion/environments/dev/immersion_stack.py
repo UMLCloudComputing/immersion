@@ -27,28 +27,24 @@ class ImmersionStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         if os.getenv('CI') == "true":
-            APP_NAME = ssm.StringParameter.from_secure_string_parameter_attributes(
+            APP_NAME = ssm.StringParameter.value_from_lookup(
                 self,
-                "CI_APP_NAME",
                 parameter_name="/immersion/app_name"
                 )
             
-            DISCORD_TOKEN = ssm.StringParameter.from_secure_string_parameter_attributes(
+            DISCORD_TOKEN = ssm.StringParameter.value_from_lookup(
                 self,
-                "DISCORD_TOKEN",
-                parameter_name="/immersion/discord_token"
+                parameter_name="/immersion/discord-token-secure"
                 )
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
         
-        SSM_PARAMETER_NAME_API = ssm.StringParameter.from_secure_string_parameter_attributes(
+        SSM_PARAMETER_NAME_API = ssm.StringParameter.value_from_lookup(
                 self,
-                "SSM_PARAMETER_NAME_API",
                 parameter_name="engage_api_key_test"
                 )
 
-        os.exit() # for now
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
@@ -134,7 +130,7 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f"{APP_NAME}DiscordAppDockerImage",
-                    directory='src/discordapp/'
+                    directory='../../../src/discordapp/'
                 )
             ),
             environment={
@@ -169,7 +165,7 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f"{APP_NAME}DataParserImage",
-                    directory='src/data_parser/',
+                    directory='../../../src/data_parser/',
                 )
             ),
             environment={
@@ -256,8 +252,8 @@ class ImmersionStack(Stack):
         club_information_lambda = lambda_python.PythonFunction(
             self,
             f"{APP_NAME}ClubInformationLambda",
-            runtime=Runtime.PYTHON_3_13,
-            entry='src/data_filters/onboarding',
+            runtime=Runtime.PYTHON_3_10,
+            entry='../../../src/data_filters/onboarding',
             handler='lambda_handler',
             environment={
                 'QUEUE_URL': queue.queue_url
