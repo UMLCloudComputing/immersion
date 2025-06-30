@@ -7,6 +7,8 @@ on:
 jobs:
   dev-deploy-to-aws:
     runs-on: ubuntu-latest
+    env:
+      CICD_ACCOUNT_ID: ${{ secrets.CICD_ACCOUNT_ID }}
     permissions:
       id-token: write
       contents: read
@@ -34,5 +36,5 @@ jobs:
 
       - name: Build the CDK stack using the aws profile
         run: |
-          cd immersion/environments/prod
+          cd immersion/environments/dev
           cdk deploy --app "python3 app.py" --require-approval never
