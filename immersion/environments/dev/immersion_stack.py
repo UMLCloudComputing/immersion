@@ -48,7 +48,8 @@ class ImmersionStack(Stack):
                 parameter_name="engage_api_key_test"
                 )
 
-
+        os._exit() # for now
+                        
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
             self, 
@@ -133,7 +134,7 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f"{APP_NAME}DiscordAppDockerImage",
-                    directory='src/discordapp/'
+                    directory='../../../src/discordapp/'
                 )
             ),
             environment={
@@ -168,7 +169,7 @@ class ImmersionStack(Stack):
                 DockerImageAsset(
                     self,
                     f"{APP_NAME}DataParserImage",
-                    directory='src/data_parser/',
+                    directory='../../../src/data_parser/',
                 )
             ),
             environment={
@@ -264,4 +265,3 @@ class ImmersionStack(Stack):
         )
         queue.grant_send_messages(club_information_lambda)
         engage_api_key_param.grant_read(club_information_lambda)
-        
