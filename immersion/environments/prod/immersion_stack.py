@@ -265,3 +265,4 @@ class ImmersionStack(Stack):
         )
         queue.grant_send_messages(club_information_lambda)
         engage_api_key_param.grant_read(club_information_lambda)
+        
