@@ -127,7 +127,7 @@ class ImmersionStack(Stack):
             cpu=512, # 0.5 vCPU
         )
 
-        app_task_defintion.add_container(
+        app_task_defintion.add_container(aws_cdk.aws_ecs.ContainerDefinitionOptions(
             f"{APP_NAME}DiscordApp",
             image=ecs.ContainerImage.from_docker_image_asset(
                 DockerImageAsset(
@@ -139,7 +139,7 @@ class ImmersionStack(Stack):
             environment={
                 'DISCORD_TOKEN': DISCORD_TOKEN
             }
-        )
+        ))
 
         app_service = ecs.FargateService(
             self,
