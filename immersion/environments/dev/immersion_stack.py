@@ -27,7 +27,7 @@ class ImmersionStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         if os.getenv('CI') == "true":
-            APP_NAME = ssm.StringParameter.from_secure_string_parameter_attributes(
+            APP_NAME = ssm.StringParameter.from_string_parameter_attributes(
                 self,
                 "CI_APP_NAME",
                 parameter_name="/immersion/app_name"
@@ -36,7 +36,7 @@ class ImmersionStack(Stack):
             DISCORD_TOKEN = ssm.StringParameter.from_secure_string_parameter_attributes(
                 self,
                 "DISCORD_TOKEN",
-                parameter_name="/immersion/discord_token"
+                parameter_name="/immersion/discord-token-secure"
                 ).string_value
         else:
             APP_NAME = os.getenv('APP_NAME')
@@ -122,7 +122,7 @@ class ImmersionStack(Stack):
         # Discord App Container Definition 
         app_task_defintion = ecs.FargateTaskDefinition(
             self,
-            "ImmersionDiscordAppTaskDefinition",
+            f"{APP_NAME}DiscordAppTaskDefinition",
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
@@ -156,7 +156,7 @@ class ImmersionStack(Stack):
         # Data Parser Task Definition
         parser_task_definition = ecs.FargateTaskDefinition(
             self,
-            "ImmersionDataParserTask",
+            f"{APP_NAME}DataParserTask",
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
