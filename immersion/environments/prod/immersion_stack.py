@@ -122,7 +122,7 @@ class ImmersionStack(Stack):
         # Discord App Container Definition 
         app_task_defintion = ecs.FargateTaskDefinition(
             self,
-            f"{APP_NAME}DiscordAppTaskDefinition",
+            "ImmersionDiscordAppTaskDefinition",
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
@@ -156,7 +156,7 @@ class ImmersionStack(Stack):
         # Data Parser Task Definition
         parser_task_definition = ecs.FargateTaskDefinition(
             self,
-            f"{APP_NAME}DataParserTask",
+            "ImmersionDataParserTask",
             memory_limit_mib=1024, # 1 GB
             cpu=512, # 0.5 vCPU
         )
