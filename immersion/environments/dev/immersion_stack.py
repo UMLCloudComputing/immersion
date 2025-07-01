@@ -255,7 +255,7 @@ class ImmersionStack(Stack):
         club_information_lambda = lambda_python.PythonFunction(
             self,
             f"{APP_NAME}ClubInformationLambda",
-            runtime=Runtime.PYTHON_3_13,
+            runtime=Runtime.PYTHON_3_10,
             entry='src/data_filters/onboarding',
             handler='lambda_handler',
             environment={
