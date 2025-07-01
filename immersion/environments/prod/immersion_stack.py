@@ -256,7 +256,7 @@ class ImmersionStack(Stack):
             self,
             f"{APP_NAME}ClubInformationLambda",
             runtime=Runtime.PYTHON_3_10,
-            entry='src/data_filters/onboarding',
+            entry='../../../src/data_filters/onboarding',
             handler='lambda_handler',
             environment={
                 'QUEUE_URL': queue.queue_url
