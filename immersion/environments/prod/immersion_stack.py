@@ -30,12 +30,12 @@ class ImmersionStack(Stack):
             APP_NAME = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="/immersion/app_name"
-                ).string_value
+                )
             
             DISCORD_TOKEN = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="/immersion/discord-token-secure"
-                ).string_value
+                )
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -43,7 +43,7 @@ class ImmersionStack(Stack):
         SSM_PARAMETER_NAME_API = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="engage_api_key_test"
-                ).string_value
+                )
 
                         
         # DynamoDB Table Definitions
