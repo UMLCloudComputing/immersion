@@ -27,24 +27,21 @@ class ImmersionStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         if os.getenv('CI') == "true":
-            APP_NAME = ssm.StringParameter.from_string_parameter_attributes(
+            APP_NAME = ssm.StringParameter.value_from_lookup(
                 self,
-                "CI_APP_NAME",
                 parameter_name="/immersion/app_name"
                 ).string_value
             
-            DISCORD_TOKEN = ssm.StringParameter.from_secure_string_parameter_attributes(
+            DISCORD_TOKEN = ssm.StringParameter.value_from_lookup(
                 self,
-                "DISCORD_TOKEN",
                 parameter_name="/immersion/discord-token-secure"
                 ).string_value
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
         
-        SSM_PARAMETER_NAME_API = ssm.StringParameter.from_secure_string_parameter_attributes(
+        SSM_PARAMETER_NAME_API = ssm.StringParameter.value_from_lookup(
                 self,
-                "SSM_PARAMETER_NAME_API",
                 parameter_name="engage_api_key_test"
                 ).string_value
 
