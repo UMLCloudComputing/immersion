@@ -10,7 +10,8 @@ from aws_cdk import (
     aws_applicationautoscaling as appautoscaling,
     aws_lambda as _lambda,
     aws_lambda_python_alpha as lambda_python,
-    aws_ssm as ssm
+    aws_ssm as ssm,
+    aws_amplify as amplify
 )
 from aws_cdk.aws_ecr_assets import DockerImageAsset
 from aws_cdk.aws_cloudwatch_actions import ApplicationScalingAction
@@ -30,12 +31,12 @@ class ImmersionStack(Stack):
             APP_NAME = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="/immersion/app_name"
-                )
+            )
             
             DISCORD_TOKEN = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="/immersion/discord-token-secure"
-                )
+            )
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -43,8 +44,14 @@ class ImmersionStack(Stack):
         SSM_PARAMETER_NAME_API = ssm.StringParameter.value_from_lookup(
                 self,
                 parameter_name="engage_api_key_test"
-                )
+        )
 
+        # Amplify definition
+        amplify_app = amplify.CfnApp(
+            self,
+            f"{APP_NAME}AmplifyApp",
+            access_token=
+        )
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
@@ -246,7 +253,7 @@ class ImmersionStack(Stack):
         engage_api_key_param = ssm.StringParameter.from_secure_string_parameter_attributes(
             self,
             f"{APP_NAME}APIKEY",
-            parameter_name=f"{os.getenv('SSM_PARAMETER_NAME_API')}"
+            parameter_name=f"{SSM_PARAMETER_NAME_API}"
         )
         
         club_information_lambda = lambda_python.PythonFunction(
