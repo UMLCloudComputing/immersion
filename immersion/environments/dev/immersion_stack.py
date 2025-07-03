@@ -54,7 +54,8 @@ class ImmersionStack(Stack):
         # Amplify definition
         amplify_app = amplify.CfnApp(
             self,
-            name=f"{APP_NAME}AmplifyApp",
+            f"{APP_NAME}AmplifyApp",
+            name=f"immersion-dashboard",
             access_token=ROSHAN_GH_ACCESS_TOKEN,
             repository="https://github.com/UMLCloudComputing/immersion"
         )
