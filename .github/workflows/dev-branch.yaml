@@ -44,4 +44,5 @@ jobs:
       - name: Build the CDK stack using the aws profile
         run: |
           cd immersion/environments/dev
-          cdk deploy --app "python3 app.py" --require-approval never
+          chmod +X cdk-deploy-command.sh
+          ./cdk-deploy-command.sh
