@@ -46,12 +46,19 @@ class ImmersionStack(Stack):
                 parameter_name="engage_api_key_test"
         )
 
+        ROSHAN_GH_ACCESS_TOKEN = ssm.StringParameter.value_from_lookup(
+            self,
+            parameter_name="/immersion/roshan-github-access-token-amplify-cdk"
+        )
+
         # Amplify definition
         amplify_app = amplify.CfnApp(
             self,
             f"{APP_NAME}AmplifyApp",
-            access_token=
+            access_token=ROSHAN_GH_ACCESS_TOKEN,
+            repository="https://github.com/UMLCloudComputing/immersion"
         )
+        amplify_app.attr_default_domain = "https://immersion.umlcloudcomputing.org"
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
