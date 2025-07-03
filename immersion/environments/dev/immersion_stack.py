@@ -59,7 +59,6 @@ class ImmersionStack(Stack):
             access_token=ROSHAN_GH_ACCESS_TOKEN,
             repository="https://github.com/UMLCloudComputing/immersion"
         )
-        amplify_app.attr_default_domain = "https://immersion.umlcloudcomputing.org"
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
