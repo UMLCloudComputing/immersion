@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CICD_ACCOUNT_ID: ${{ secrets.CICD_ACCOUNT_ID }}
+      SSM_PARAMETER_NAME_API: ${{ vars.SSM_PARAMETER_NAME_API }}
       
     permissions:
       id-token: write

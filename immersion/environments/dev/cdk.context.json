@@ -1,1 +1,29 @@
-{}
+{
+  "ssm:account=840414111995:parameterName=/immersion/roshan-github-access-token-amplify-cdk:region=us-east-1": "AQICAHhUwp7f5CY7/HNChmHuUIFs3parjGJM9EQDxjGlXDM41wExnKNahpRArxcB2C23mKxZAAAAhzCBhAYJKoZIhvcNAQcGoHcwdQIBADBwBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDBUwLV/w9rVK7ySe6wIBEIBDkVZ7WNYcefimBnfVbTU9YD03zsTa3Cl/nl8y7BcSGCmPb64fJNPhhS9Ts29qD50QhXY/eF0KOKsoS7UBMtndPBCk7A==",
+  "vpc-provider:account=840414111995:filter.tag:Name=Club-VPC:region=us-east-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-031449cf5f23e70a5",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "ownerAccountId": "840414111995",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-09c9eff113c760d5a",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "us-east-1a",
+            "routeTableId": "rtb-091515db4fcca31fb"
+          },
+          {
+            "subnetId": "subnet-07e3ceec69113c347",
+            "cidr": "10.0.2.0/24",
+            "availabilityZone": "us-east-1b",
+            "routeTableId": "rtb-0b41f7fb788fad073"
+          }
+        ]
+      }
+    ]
+  }
+}

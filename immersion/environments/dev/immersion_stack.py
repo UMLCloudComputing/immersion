@@ -37,26 +37,30 @@ class ImmersionStack(Stack):
                 self,
                 parameter_name="/immersion/discord-token-secure"
             )
+
+            ROSHAN_GH_ACCESS_TOKEN = ssm.StringParameter.value_from_lookup(
+            self,
+            parameter_name="/immersion/roshan-github-access-token-amplify-cdk"
+            ) 
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
         
-        SSM_PARAMETER_NAME_API = ssm.StringParameter.value_from_lookup(
-                self,
-                parameter_name="engage_api_key_test"
-        )
+        SSM_PARAMETER_NAME_API = os.getenv('SSM_PARAMETER_NAME_API')
+        ROSHAN_GH_ACCESS_TOKEN = os.getenv('ROSHAN_GH_ACCESS_TOKEN')
 
-        ROSHAN_GH_ACCESS_TOKEN = ssm.StringParameter.value_from_lookup(
-            self,
-            parameter_name="/immersion/roshan-github-access-token-amplify-cdk"
-        )
+        
+        
+        # print("ROSHAN_GH_ACCESS_TOKEN:", ROSHAN_GH_ACCESS_TOKEN)
+        # print("APP_NAME:", APP_NAME)
+        # print("DISCORD_TOKEN:", DISCORD_TOKEN)
 
         # Amplify definition
         amplify_app = amplify.CfnApp(
             self,
             f"{APP_NAME}AmplifyApp",
-            name=f"immersion-dashboard",
-            access_token=ROSHAN_GH_ACCESS_TOKEN,
+            name=f"immersion-dashboard-dev",
+            access_token=f"{ROSHAN_GH_ACCESS_TOKEN}",
             repository="https://github.com/UMLCloudComputing/immersion"
         )
                         
