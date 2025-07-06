@@ -63,6 +63,29 @@ class ImmersionStack(Stack):
             access_token=f"{ROSHAN_GH_ACCESS_TOKEN}",
             repository="https://github.com/UMLCloudComputing/immersion"
         )
+
+        # Connect Git branch to Amplify
+        amplify_branch = amplify.CfnBranch(
+            self,
+            f"{APP_NAME}AmplifyBranchMaster",
+            app_id=amplify_app.attr_app_id,
+            branch_name="master",
+            enable_auto_build=True,
+        )
+
+        # Connect app to domain
+        amplify_cfn_domain = amplify.CfnDomain(
+            self,
+            "ImmersionAmplifyCfnDomain",
+            app_id=amplify_app.attr_app_id,
+            domain_name="umlcloudcomputing.org",
+            sub_domain_settings=[amplify.CfnDomain.SubDomainSettingProperty(
+                branch_name="master",
+                prefix="immersion"
+            )]
+        )
+
+        amplify_cfn_domain.add_dependency(amplify_branch)  # Make sure domain is created after branch is connected.
                         
         # DynamoDB Table Definitions
         serverTable = dynamodb.TableV2(
