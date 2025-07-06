@@ -2,31 +2,54 @@ package db
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/umlcloudcomputing/immersion/dataparser/models"
+	"github.com/umlcloudcomputing/immersion/dataparser/util"
 )
 
-var (
-	OrganizationTableName = os.Getenv("ORGANIZATION_TABLE")
+type TableName int
+
+const (
+	ServerTable TableName = iota
+	OnboardingTable
+	CacheTable
+	EventTable
 )
 
-func InsertOnboarding(ctx context.Context, db *dynamodb.Client, org models.Onboarding) {
-	item, err := attributevalue.MarshalMap(org)
-	if err != nil {
-		log.Fatal(item)
-	}
+var tableNames = map[TableName]string{
+	ServerTable:     os.Getenv("SERVER_TABLE"),
+	OnboardingTable: os.Getenv("ORGANIZATION_TABLE"),
+	CacheTable:      os.Getenv("CACHE_TABLE"),
+	EventTable:      os.Getenv("EVENT_TABLE"),
+}
+
+func InsertItem(ctx context.Context, db *dynamodb.Client, table TableName, data any) {
+	item, err := attributevalue.MarshalMap(data)
+	util.CheckError(err)
 
 	input := dynamodb.PutItemInput{
-		TableName: &OrganizationTableName,
+		TableName: aws.String(tableNames[table]),
 		Item:      item,
 	}
 
 	_, err = db.PutItem(ctx, &input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	util.CheckError(err)
+	fmt.Printf("Inserted an item into %s\n", tableNames[table])
 }
+
+//func InsertOnboarding(ctx context.Context, db *dynamodb.Client, org models.Onboarding) {
+//	item, err := attributevalue.MarshalMap(org)
+//	util.CheckError(err)
+//
+//	input := dynamodb.PutItemInput{
+//		TableName: &OrganizationTableName,
+//		Item:      item,
+//	}
+//
+//	_, err = db.PutItem(ctx, &input)
+//	util.CheckError(err)
+//}
