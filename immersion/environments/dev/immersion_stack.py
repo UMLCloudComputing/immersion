@@ -45,9 +45,9 @@ class ImmersionStack(Stack):
         else:
             APP_NAME = os.getenv('APP_NAME')
             DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+            ROSHAN_GH_ACCESS_TOKEN = os.getenv('ROSHAN_GH_ACCESS_TOKEN')
         
         SSM_PARAMETER_NAME_API = os.getenv('SSM_PARAMETER_NAME_API')
-        ROSHAN_GH_ACCESS_TOKEN = os.getenv('ROSHAN_GH_ACCESS_TOKEN')
 
         
         
