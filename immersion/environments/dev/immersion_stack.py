@@ -51,7 +51,7 @@ class ImmersionStack(Stack):
 
         
         
-        # print("ROSHAN_GH_ACCESS_TOKEN:", ROSHAN_GH_ACCESS_TOKEN)
+        print("ROSHAN_GH_ACCESS_TOKEN:", ROSHAN_GH_ACCESS_TOKEN)
         # print("APP_NAME:", APP_NAME)
         # print("DISCORD_TOKEN:", DISCORD_TOKEN)
 
